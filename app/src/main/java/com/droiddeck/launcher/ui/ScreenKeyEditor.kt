@@ -234,6 +234,13 @@ fun ScreenKeyEditor(
                         style = MaterialTheme.typography.bodySmall, maxLines = 1,
                     )
                     Switch(checked = toggle, onCheckedChange = onToggle, modifier = Modifier.height(30.dp).focusGlide())
+                    if (directions.isEmpty()) {
+                        Text(
+                            stringResource(R.string.screen_key_text), Modifier.padding(start = 6.dp, end = 2.dp),
+                            style = MaterialTheme.typography.bodySmall, maxLines = 1,
+                        )
+                        Switch(checked = labels, onCheckedChange = onLabels, modifier = Modifier.height(30.dp).focusGlide())
+                    }
                 }
                 if (directions.isNotEmpty()) {
                     Row(
