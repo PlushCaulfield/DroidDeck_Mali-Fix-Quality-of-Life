@@ -232,8 +232,8 @@ class SessionActivity : ComponentActivity(), SurfaceHolder.Callback {
     private var screenKeysShown by mutableStateOf(true)
     private var screenLayoutNames by mutableStateOf(listOf<String>())
     private var screenKeys: ScreenKeys? = null
-    /** Steam game in front (its id), "*" when the front app is unknown, null in Steam's own menu. */
-    private var screenKeysGameKey: String? = null
+    /** Steam game in front (its id), "*" while the front app is unknown, null once Steam's own menu is known to be in front. */
+    private var screenKeysGameKey: String? = "*"
     private var recognizedGesture by mutableStateOf<TouchscreenGestures.Gesture?>(null)
     private var gesturePointerX = 0f
     private var gesturePointerY = 0f
