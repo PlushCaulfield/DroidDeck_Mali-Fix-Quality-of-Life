@@ -232,6 +232,8 @@ class SessionActivity : ComponentActivity(), SurfaceHolder.Callback {
     private var screenKeysShown by mutableStateOf(true)
     private var screenLayoutNames by mutableStateOf(listOf<String>())
     private var screenKeys: ScreenKeys? = null
+    /** Steam game in front (its id), "*" when the front app is unknown, null in Steam's own menu. */
+    private var screenKeysGameKey: String? = null
     private var recognizedGesture by mutableStateOf<TouchscreenGestures.Gesture?>(null)
     private var gesturePointerX = 0f
     private var gesturePointerY = 0f
@@ -693,7 +695,7 @@ class SessionActivity : ComponentActivity(), SurfaceHolder.Callback {
             keys.onSelect = { codes -> screenKeyEdit = screenKeys?.stateOf(codes) }
             keys.onEditingChanged = { if (!it) screenKeyEdit = null }
             keys.steamStyle = { steamTouchControls?.style }
-            keys.visibility = if (screenKeysShown) View.VISIBLE else View.GONE
+            keys.visibility = if (screenKeysVisible()) View.VISIBLE else View.GONE
             root.addView(keys)
         }
         keyboard = KeyboardHost(this).also { host ->
@@ -1101,6 +1103,12 @@ class SessionActivity : ComponentActivity(), SurfaceHolder.Callback {
                         kotlinx.coroutines.delay(3000)
                     }
                 }
+                LaunchedEffect(AgentGuest.focusRevision) {
+                    val front = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                        runCatching { resolveFrontGameKey() }.getOrNull()
+                    }
+                    applyFrontGame(front)
+                }
                 LaunchedEffect(drawerOpen, achievementsOpen, AgentGuest.focusRevision, StoreAchievements.revision) {
                     if (!drawerOpen && !achievementsOpen) return@LaunchedEffect
                     val found = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
@@ -1352,7 +1360,7 @@ class SessionActivity : ComponentActivity(), SurfaceHolder.Callback {
                 screenKeysShown = shown
                 com.droiddeck.launcher.input.ControllerPrefs.setScreenKeysShown(this@SessionActivity, shown)
                 screenKeys?.stopEditing()
-                screenKeys?.visibility = if (shown) View.VISIBLE else View.GONE
+                screenKeys?.visibility = if (screenKeysVisible()) View.VISIBLE else View.GONE
             },
             onScreenLayouts = {
                 drawerOpen = false
@@ -1509,6 +1517,33 @@ class SessionActivity : ComponentActivity(), SurfaceHolder.Callback {
     }
 
     private fun closeAchievements() { achievementsOpen = false }
+
+    private fun steamMenuFront() = SessionState.mode == SessionService.MODE_STEAM && screenKeysGameKey == null
+
+    private fun screenKeysVisible() = screenKeysShown && !steamMenuFront()
+
+    private fun resolveFrontGameKey(): String? {
+        if (!SessionState.running || SessionState.mode != SessionService.MODE_STEAM) return "*"
+        val snapshot = AgentGuest.focus(this) ?: return "*"
+        val focused = if (snapshot.has("focusedApp") && !snapshot.isNull("focusedApp")) snapshot.optLong("focusedApp") else null
+        val windows = snapshot.optJSONArray("focusableApps")?.let { list -> List(list.length()) { list.optLong(it) } }.orEmpty()
+        val id = when {
+            focused != null && focused > 0 && focused != 769L -> focused
+            focused == 769L -> null
+            else -> windows.filter { it > 0 && it != 769L }.distinct().singleOrNull()
+        }
+        return id?.toString()
+    }
+
+    private fun applyFrontGame(key: String?) {
+        if (key == screenKeysGameKey) return
+        screenKeysGameKey = key
+        val keys = screenKeys ?: return
+        if (key != null) keys.switchLayout(if (key == "*") null else key)
+        keys.visibility = if (screenKeysVisible()) View.VISIBLE else View.GONE
+        updateOnScreenPad()
+        applyTouchRouting()
+    }
 
     private fun resolveAchievementsInFront(): AchievementsInFront? {
         if (!SessionState.running || SessionState.mode != SessionService.MODE_STEAM) return null
@@ -3417,6 +3452,7 @@ class SessionActivity : ComponentActivity(), SurfaceHolder.Callback {
     }
 
     private fun effectiveTouchMode(): String {
+        if (steamMenuFront() && SessionPrefs.touchMode(this) != SessionPrefs.TOUCH_OFF) return SessionPrefs.TOUCH_DIRECT
         val options = steamTouchOptions
         if (options == null || steamTouchControls?.visibility != View.VISIBLE) return SessionPrefs.touchMode(this)
         return when {
@@ -3800,7 +3836,7 @@ class SessionActivity : ComponentActivity(), SurfaceHolder.Callback {
             ?.let { FileUtils.readString(it)?.trim()?.lowercase() }
             ?: SessionPrefs.oscMode(this)
         val controls = onScreenControls ?: return
-        if (pipUi || unfoldedPanel != null || pcKeyboardOpen ||
+        if (pipUi || unfoldedPanel != null || pcKeyboardOpen || steamMenuFront() ||
             (SessionState.mode == SessionService.MODE_STEAM && !SessionPrefs.builtinPad(this))) {
             onScreenButtonsVisible = false
             controls.releaseAll()
