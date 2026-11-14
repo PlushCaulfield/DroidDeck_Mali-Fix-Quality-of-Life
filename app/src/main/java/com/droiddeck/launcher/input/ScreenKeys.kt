@@ -69,6 +69,21 @@ class ScreenKeys(context: Context, private val sendKey: (Int, Boolean) -> Unit) 
         ControllerPrefs.screenKeys(context).forEach { key -> entries += entryOf(key) }
     }
 
+    /** Which game's layout is loaded; null is the shared default layout. */
+    var layoutKey: String? = null
+        private set
+
+    fun switchLayout(gameKey: String?) {
+        if (editing || gameKey == layoutKey) return
+        releaseAll()
+        layoutKey = gameKey
+        entries.clear()
+        ControllerPrefs.screenKeysFor(context, gameKey).forEach { entries += entryOf(it) }
+        entries.forEach { measure(it) }
+        selected = null
+        invalidate()
+    }
+
     var followSteam = false
         set(value) {
             if (field == value) return
@@ -84,6 +99,7 @@ class ScreenKeys(context: Context, private val sendKey: (Int, Boolean) -> Unit) 
     var onTouchMiss: ((MotionEvent) -> Unit)? = null
 
     private val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val imagePaint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
     private val strokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE }
     private val ringPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE }
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -369,7 +385,8 @@ class ScreenKeys(context: Context, private val sendKey: (Int, Boolean) -> Unit) 
     private fun label(entry: Entry) = when {
         entry.text.isNotEmpty() -> entry.text
         entry.glyph.isNotEmpty() -> entry.glyph
-        else -> screenKeyLabel(context, entry.codes)
+        entry.shape == SCREEN_KEY_DPAD || entry.shape == SCREEN_KEY_STICK || entry.labels -> screenKeyLabel(context, entry.codes)
+        else -> ""
     }
 
     private fun bitmapFor(entry: Entry): Bitmap? {
@@ -751,11 +768,12 @@ class ScreenKeys(context: Context, private val sendKey: (Int, Boolean) -> Unit) 
                 imageRect.centerX() - w / 2f, imageRect.centerY() - h / 2f,
                 imageRect.centerX() + w / 2f, imageRect.centerY() + h / 2f,
             )
-            canvas.drawBitmap(bitmap, null, bitmapRect, fillPaint)
+            imagePaint.alpha = (alpha * 255f).toInt().coerceIn(0, 255)
+            canvas.drawBitmap(bitmap, null, bitmapRect, imagePaint)
             canvas.restore()
         }
 
-        val name = label(entry)
+        val name = if (bitmap != null && entry.text.isEmpty()) "" else label(entry)
         textPaint.color = inkColor
         if (bitmap != null && name.isEmpty()) return
         var iconDrawn = false
@@ -1072,6 +1090,7 @@ class ScreenKeys(context: Context, private val sendKey: (Int, Boolean) -> Unit) 
         ControllerPrefs.setScreenKeys(
             context,
             entries.map { ScreenKey(it.codes, it.x, it.y, it.size, it.glyph, it.text, it.image, it.opacity, it.shape, it.toggle, it.labels) },
+            layoutKey,
         )
     }
 

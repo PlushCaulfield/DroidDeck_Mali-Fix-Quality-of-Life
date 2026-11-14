@@ -165,8 +165,16 @@ object ControllerPrefs {
 
     fun screenKeys(context: Context): List<ScreenKey> = decodeScreenKeys(prefs(context).getString("screenKeys", null).orEmpty())
 
-    fun setScreenKeys(context: Context, keys: List<ScreenKey>) {
-        prefs(context).edit().putString("screenKeys", encodeScreenKeys(keys)).apply()
+    private fun screenKeysPref(gameKey: String?) = if (gameKey == null) "screenKeys" else "screenKeys.game.$gameKey"
+
+    /** The layout saved for one game, or the shared default layout when that game has none yet. */
+    fun screenKeysFor(context: Context, gameKey: String?): List<ScreenKey> {
+        val raw = if (gameKey == null) null else prefs(context).getString(screenKeysPref(gameKey), null)
+        return if (raw != null) decodeScreenKeys(raw) else screenKeys(context)
+    }
+
+    fun setScreenKeys(context: Context, keys: List<ScreenKey>, gameKey: String? = null) {
+        prefs(context).edit().putString(screenKeysPref(gameKey), encodeScreenKeys(keys)).apply()
     }
 
     fun encodeScreenKeys(keys: List<ScreenKey>): String = keys.joinToString(";") {
