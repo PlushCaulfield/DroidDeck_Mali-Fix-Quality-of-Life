@@ -1,4 +1,4 @@
-**DroidDeck: Mali Fix**
+**DroidDeck: Mali Fix - Quality of Life**
 
 Сборка [DroidDeck](https://github.com/ASEbrahim/DroidDeck) с форком моста [MaliBridge](https://github.com/ASEbrahim/MaliBridge), настроенным для **Mali**. Цель: меньше фризов в Steam- и PC-играх на телефонах с Mali.
 
