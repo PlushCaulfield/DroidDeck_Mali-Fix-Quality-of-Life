@@ -88,7 +88,7 @@ class ModeSettings(
     val shaderPrecache: Boolean? = null,
     val steamRepairQueued: Boolean = false,
     val mangoapp: Boolean = true,
-    val gamescopeGameOff: Boolean = true,
+    val gamescopeGameOff: Boolean = false,
     val steamController: String? = null,
     val unfoldedControls: Boolean? = null,
     val unfoldedControlsWithController: Boolean = false,
