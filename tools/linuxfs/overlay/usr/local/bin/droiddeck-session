@@ -901,7 +901,20 @@ case $mode in
         pv=${pv# }
         pv=${pv:-$2}
       }
-      tmode= app= prev=
+      tmode= app= prev= cmode=1 cfail=
+      # gamescope starts compositing every frame (Steam's UI flickers without it). With
+      # BL_GAMESCOPE_GAME_OFF=1 it is turned off while a game is in front and on again whenever the
+      # Steam interface or its menu (focused app 769) comes up; a failed switch changes nothing.
+      bl_composite() {
+        [ "$1" = "$cmode" ] && return 0
+        if WAYLAND_DISPLAY=${GAMESCOPE_WAYLAND_DISPLAY:-gamescope-0} gamescopectl composite_force "$1" >/dev/null 2>&1; then
+          cmode=$1
+          echo "== gamescope: composite every frame $1 (focused app ${app:-?}) at $(date +%T)"
+        elif [ -z "$cfail" ]; then
+          cfail=1
+          echo "== gamescope: could not change composite_force (gamescopectl failed); left as it was"
+        fi
+      }
       while read -r line; do
         case $line in
           STEAM_TOUCH_CLICK_MODE*)
@@ -917,6 +930,13 @@ case $mode in
               echo "== focused app: $app (touch mode ${tmode:-unset}) at $(date +%T)"
               if [ -n "${BL_LAUNCH_DIR:-}" ]; then
                 printf '%s\n' "$app" > "$BL_LAUNCH_DIR/steam-focused-app.tmp" && mv -f "$BL_LAUNCH_DIR/steam-focused-app.tmp" "$BL_LAUNCH_DIR/steam-focused-app"
+              fi
+              if [ "${BL_GAMESCOPE_GAME_OFF:-0}" = 1 ] && [ "${BL_VKBRIDGE:-0}" = 1 ] && [ "${gamescope_composite_force:-}" = 1 ]; then
+                case $app in
+                  769) bl_composite 1 ;;
+                  ''|*[!0-9]*) ;;
+                  *) bl_composite 0 ;;
+                esac
               fi
             fi
             [ "$restore" = 1 ] || continue
