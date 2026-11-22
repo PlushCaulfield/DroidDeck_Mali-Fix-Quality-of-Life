@@ -2187,6 +2187,7 @@ class FrontEndActivity : ComponentActivity() {
                 shaderPrecache = if (mode == SessionService.MODE_STEAM) shaderPrecache else null,
                 steamRepairQueued = steamRepairQueued,
                 mangoapp = mangoapp,
+                gamescopeGameOff = gamescopeGameOff,
                 steamController = if (mode == SessionService.MODE_STEAM) steamController else null,
                 startupSession = startupSession,
                 bootMovie = if (mode == SessionService.MODE_STEAM) bootMovie else null,
@@ -2278,6 +2279,7 @@ class FrontEndActivity : ComponentActivity() {
                     refresh()
                 },
                 onMangoapp = { on -> SessionPrefs.setMangoapp(this, on); mangoapp = on },
+                onGamescopeGameOff = { on -> SessionPrefs.setGamescopeGameOff(this, on); gamescopeGameOff
                 onReturnAfterGame = { on -> SessionPrefs.setReturnAfterGame(this, on); returnAfterGame = on },
                 onShaderPrecache = { on -> SessionPrefs.setShaderPrecache(this, on); shaderPrecache = on },
                 onSteamController = { id -> SessionPrefs.setSteamController(this, id); steamController = id },
@@ -2471,6 +2473,7 @@ class FrontEndActivity : ComponentActivity() {
         steamClientArch = SessionPrefs.steamClientArch(this)
         steamRepairQueued = SteamRepair.queued(this)
         mangoapp = SessionPrefs.mangoapp(this)
+        gamescopeGameOff = SessionPrefs.gamescopeGameOff(this)
         returnAfterGame = SessionPrefs.returnAfterGame(this)
         loadShaderPrecache(mode)
         steamController = SessionPrefs.steamController(this)
