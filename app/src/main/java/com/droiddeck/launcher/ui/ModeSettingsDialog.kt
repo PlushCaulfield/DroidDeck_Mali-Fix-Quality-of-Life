@@ -530,15 +530,15 @@ fun ModeSheetRows(s: ModeSettings, a: ModeSettingsActions, tab: String, extras: 
             }
         }
         SettingsGroup(stringResource(R.string.mode_client)) {
-            ToggleRow(
+                        ToggleRow(
                 host, "mangoapp", stringResource(R.string.mode_mangoapp),
                 stringResource(R.string.mode_mangoapp_hint),
-                ToggleRow(
-            host, "gamescopegameoff", stringResource(R.string.mode_gamescope_game_off),
-            stringResource(R.string.mode_gamescope_game_off_hint),
-            s.gamescopeGameOff, onChange = a.onGamescopeGameOff,
-        )
                 s.mangoapp, onChange = a.onMangoapp,
+            )
+            ToggleRow(
+                host, "gamescopegameoff", stringResource(R.string.mode_gamescope_game_off),
+                stringResource(R.string.mode_gamescope_game_off_hint),
+                s.gamescopeGameOff, onChange = a.onGamescopeGameOff,
             )
             if (s.returnAfterGame != null) ToggleRow(
                 host, "returnaftergame", stringResource(R.string.mode_return_after_game),
