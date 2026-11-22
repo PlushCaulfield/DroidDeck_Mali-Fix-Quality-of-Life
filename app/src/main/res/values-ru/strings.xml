@@ -340,6 +340,8 @@
     <string name="mode_decky_remove_title">Удалить Decky Loader?</string>
     <string name="mode_decky_remove_text">Удаляет загрузчик. Ваши плагины и настройки сохранятся.</string>
     <string name="mode_client">Клиент</string>
+    <string name="mode_gamescope_game_off">Без склейки кадров в играх</string>
+    <string name="mode_gamescope_game_off_hint">Пока открыто меню Steam, кадры склеиваются (интерфейс не мерцает), а в играх склейка выключается: Больше fps. Отключите, если в играх что-то не так. Применяется со следующей сессии.</string>
     <string name="mode_mangoapp">Оверлей производительности</string>
     <string name="mode_mangoapp_hint">Отключите, если игры вылетают или показывают черный экран в режиме Deck. Вступит в силу в следующей сессии.</string>
     <string name="mode_return_after_game">Возвращаться в DroidDeck после игры</string>
