@@ -2280,7 +2280,7 @@ class FrontEndActivity : ComponentActivity() {
                     refresh()
                 },
                 onMangoapp = { on -> SessionPrefs.setMangoapp(this, on); mangoapp = on },
-                onGamescopeGameOff = { on -> SessionPrefs.setGamescopeGameOff(this, on); gamescopeGameOff
+                onGamescopeGameOff = { on -> SessionPrefs.setGamescopeGameOff(this, on); gamescopeGameOff = on },
                 onReturnAfterGame = { on -> SessionPrefs.setReturnAfterGame(this, on); returnAfterGame = on },
                 onShaderPrecache = { on -> SessionPrefs.setShaderPrecache(this, on); shaderPrecache = on },
                 onSteamController = { id -> SessionPrefs.setSteamController(this, id); steamController = id },
