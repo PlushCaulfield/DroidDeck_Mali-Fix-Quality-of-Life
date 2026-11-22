@@ -1,7 +1,9 @@
 package com.droiddeck.launcher.input
 
+import android.util.Base64
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.File
 import kotlin.math.roundToInt
 
 private val ICP_NAMES: Map<Int, String> = mapOf(
@@ -45,7 +47,9 @@ private fun screenKeyShape(shape: String): Int = when (shape) {
     else -> SCREEN_KEY_PILL
 }
 
-fun exportScreenLayout(keys: List<ScreenKey>, widthPx: Int, density: Float): String {
+// Extra fields "glyph", "labels" and "ddImage" (the key's picture as base64 PNG) are DroidDeck's own;
+// other apps that read this format ignore unknown fields. imageDir is where key pictures are kept.
+fun exportScreenLayout(keys: List<ScreenKey>, widthPx: Int, density: Float, imageDir: File? = null): String {
     val snap = widthPx / 100f
     val elements = JSONArray()
     keys.forEach { key ->
@@ -55,7 +59,7 @@ fun exportScreenLayout(keys: List<ScreenKey>, widthPx: Int, density: Float): Str
             val name = ICP_NAMES[code]
             if (name != null) binds.put(name) else if (directional) binds.put("")
         }
-        if (binds.length() == 0) return@forEach
+        if (binds.length() == 0 && key.codes.isEmpty()) return@forEach
         val shape = icpShape(key.shape)
         val sizePx = key.size * density
         val scale = when {
@@ -84,7 +88,21 @@ fun exportScreenLayout(keys: List<ScreenKey>, widthPx: Int, density: Float): Str
                 .put("swipeable", false)
                 .put("text", key.text)
                 .put("iconId", 0)
-                .apply { if (key.opacity < 1f) put("opacity", key.opacity) },
+                .put("labels", key.labels)
+                .put("ddCodes", JSONArray(key.codes))
+                .put("ddShape", key.shape)
+                .put("ddSize", key.size)
+                .apply {
+                    if (key.opacity < 1f) put("opacity", key.opacity)
+                    if (key.glyph.isNotEmpty()) put("glyph", key.glyph)
+                    if (key.image.isNotEmpty() && imageDir != null) {
+                        val file = File(imageDir, key.image)
+                        if (file.isFile) {
+                            runCatching { Base64.encodeToString(file.readBytes(), Base64.NO_WRAP) }
+                                .getOrNull()?.let { put("ddImage", it) }
+                        }
+                    }
+                },
         )
     }
     return JSONObject()
@@ -95,7 +113,7 @@ fun exportScreenLayout(keys: List<ScreenKey>, widthPx: Int, density: Float): Str
         .toString()
 }
 
-fun importScreenLayout(raw: String, widthPx: Int, density: Float): List<ScreenKey>? {
+fun importScreenLayout(raw: String, widthPx: Int, density: Float, imageDir: File? = null): List<ScreenKey>? {
     val root = runCatching { JSONObject(raw) }.getOrNull() ?: return null
     val elements = root.optJSONArray("elements") ?: return null
     val snap = widthPx / 100f
@@ -104,9 +122,12 @@ fun importScreenLayout(raw: String, widthPx: Int, density: Float): List<ScreenKe
         val element = elements.optJSONObject(i) ?: continue
         val type = element.optString("type", "BUTTON")
         if (type != "BUTTON" && type != "D_PAD" && type != "STICK") continue
-        val binds = element.optJSONArray("bindings") ?: continue
+        val binds = element.optJSONArray("bindings") ?: JSONArray()
         val raw = (0 until binds.length()).map { ICP_CODES[binds.optString(it)] ?: 0 }
-        val codes = if (type == "D_PAD" || type == "STICK") {
+        val exact = element.optJSONArray("ddCodes")?.let { a -> (0 until a.length()).map { a.optInt(it, 0) } }
+        val codes = if (!exact.isNullOrEmpty()) {
+            exact
+        } else if (type == "D_PAD" || type == "STICK") {
             raw.dropLastWhile { it == 0 }.ifEmpty { listOf(0) }
         } else {
             raw.filter { it != 0 }
@@ -115,6 +136,7 @@ fun importScreenLayout(raw: String, widthPx: Int, density: Float): List<ScreenKe
         val dpad = type == "D_PAD"
         val stick = type == "STICK"
         val shape = when {
+            element.has("ddShape") -> element.optInt("ddShape", SCREEN_KEY_PILL)
             dpad -> SCREEN_KEY_DPAD
             stick -> SCREEN_KEY_STICK
             else -> screenKeyShape(element.optString("shape"))
@@ -125,12 +147,26 @@ fun importScreenLayout(raw: String, widthPx: Int, density: Float): List<ScreenKe
             shape == SCREEN_KEY_CIRCLE -> 6f * snap * scale
             else -> 4f * snap * scale
         }
+        var image = ""
+        val encoded = element.optString("ddImage")
+        if (encoded.isNotEmpty() && imageDir != null) {
+            val name = "key_imp_" + System.currentTimeMillis() + "_" + i + ".png"
+            val ok = runCatching {
+                imageDir.mkdirs()
+                File(imageDir, name).writeBytes(Base64.decode(encoded, Base64.DEFAULT))
+            }.isSuccess
+            if (ok) image = name else File(imageDir, name).delete()
+        }
         keys += ScreenKey(
             codes = codes,
             x = element.optDouble("x", 0.5).toFloat().coerceIn(0f, 1f),
             y = element.optDouble("y", 0.5).toFloat().coerceIn(0f, 1f),
-            size = (sizePx / density).roundToInt().coerceIn(ScreenKeys.MIN_SIZE, ScreenKeys.MAX_SIZE),
+            size = (if (element.has("ddSize")) element.optInt("ddSize") else (sizePx / density).roundToInt())
+                .coerceIn(ScreenKeys.MIN_SIZE, ScreenKeys.MAX_SIZE),
+            glyph = element.optString("glyph").take(16),
             text = element.optString("text").take(24),
+            image = image,
+            labels = element.optBoolean("labels", true),
             opacity = element.optDouble("opacity", 1.0).toFloat().coerceIn(0.2f, 1f),
             shape = shape,
             toggle = element.optBoolean("toggleSwitch"),
