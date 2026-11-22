@@ -364,6 +364,8 @@
     <string name="mode_decky_remove_title">Uninstall Decky Loader?</string>
     <string name="mode_decky_remove_text">Removes the loader. Your plugins and settings are kept.</string>
     <string name="mode_client">Client</string>
+    <string name="mode_gamescope_game_off">No frame compositing in games</string>
+    <string name="mode_gamescope_game_off_hint">Frames are composited again while the Steam menu is open, so the interface does not flicker, and switched off while a game is in front, for more fps. Turn off if something looks wrong in games. Applies next session.</string>
     <string name="mode_mangoapp">Performance overlay</string>
     <string name="mode_mangoapp_hint">Turn off if games crash or go black in Deck mode. Applies next session.</string>
     <string name="mode_return_after_game">Return to DroidDeck after a game</string>
