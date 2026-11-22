@@ -133,6 +133,7 @@ class FrontEndActivity : ComponentActivity() {
     private var shaderPrecache by mutableStateOf<Boolean?>(null)
     private var steamRepairQueued by mutableStateOf(false)
     private var mangoapp by mutableStateOf(true)
+    private var gamescopeGameOff by mutableStateOf(true)
     private var steamController by mutableStateOf(SessionPrefs.CONTROLLER_DECK)
     private var showComponents by mutableStateOf(false)
     private var focusComponentsContent by mutableStateOf(true)
