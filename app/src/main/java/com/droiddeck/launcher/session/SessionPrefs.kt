@@ -743,7 +743,7 @@ object SessionPrefs {
     fun vsyncThread(context: Context): Boolean = prefs(context).getBoolean("vsyncThread", true)
     fun renderOnCommit(context: Context): Boolean = prefs(context).getBoolean("renderOnCommit", true)
     fun setMangoapp(context: Context, on: Boolean) { prefs(context).edit().putBoolean("mangoapp", on).apply() }
-    fun gamescopeGameOff(context: Context): Boolean = prefs(context).getBoolean("gamescopeGameOff", true)
+    fun gamescopeGameOff(context: Context): Boolean = prefs(context).getBoolean("gamescopeGameOff", false)
 fun setGamescopeGameOff(context: Context, on: Boolean) { prefs(context).edit().putBoolean("gamescopeGameOff", on).apply() }
 
     fun zinkLazy(context: Context): Boolean = prefs(context).getBoolean("zinkLazy", true)
