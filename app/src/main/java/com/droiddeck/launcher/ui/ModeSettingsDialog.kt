@@ -88,6 +88,7 @@ class ModeSettings(
     val shaderPrecache: Boolean? = null,
     val steamRepairQueued: Boolean = false,
     val mangoapp: Boolean = true,
+    val gamescopeGameOff: Boolean = true,
     val steamController: String? = null,
     val unfoldedControls: Boolean? = null,
     val unfoldedControlsWithController: Boolean = false,
@@ -139,6 +140,7 @@ class ModeSettingsActions(
     val onStretch16x9: (Boolean) -> Unit = {},
     val onSteamRepair: () -> Unit = {},
     val onSteamClientArch: (String) -> Unit = {},
+    val onGamescopeGameOff: (Boolean) -> Unit = {},
     val onMangoapp: (Boolean) -> Unit = {},
     val onReturnAfterGame: (Boolean) -> Unit = {},
     val onShaderPrecache: (Boolean) -> Unit = {},
@@ -531,6 +533,11 @@ fun ModeSheetRows(s: ModeSettings, a: ModeSettingsActions, tab: String, extras: 
             ToggleRow(
                 host, "mangoapp", stringResource(R.string.mode_mangoapp),
                 stringResource(R.string.mode_mangoapp_hint),
+                ToggleRow(
+            host, "gamescopegameoff", stringResource(R.string.mode_gamescope_game_off),
+            stringResource(R.string.mode_gamescope_game_off_hint),
+            s.gamescopeGameOff, onChange = a.onGamescopeGameOff,
+        )
                 s.mangoapp, onChange = a.onMangoapp,
             )
             if (s.returnAfterGame != null) ToggleRow(
