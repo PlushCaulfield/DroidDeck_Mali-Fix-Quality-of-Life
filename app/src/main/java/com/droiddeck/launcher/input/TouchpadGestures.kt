@@ -113,7 +113,7 @@ class TouchpadGestures(
                     dragging = true
                     listener.onButton(PointerGestures.BTN_LEFT, true, x, y)
                 } else {
-                    dragging = false
+                if (holdToDrag) handler.postDelayed(longPress, TouchTiming.HOLD_MS)
                     handler.postDelayed(longPress, TouchTiming.HOLD_MS)
                 }
                 return true
@@ -214,6 +214,10 @@ class TouchpadGestures(
                 for (h in 0 until event.historySize)
                     trackMove(event.getHistoricalX(0, h), event.getHistoricalY(0, h))
                 trackMove(event.x, event.y)
+                            if (pendingMove) {
+                pendingMove = false
+                listener.onMove(x, y)
+                            }
                 return true
             }
             MotionEvent.ACTION_POINTER_UP -> {
