@@ -744,7 +744,9 @@ object SessionPrefs {
     fun renderOnCommit(context: Context): Boolean = prefs(context).getBoolean("renderOnCommit", true)
     fun setMangoapp(context: Context, on: Boolean) { prefs(context).edit().putBoolean("mangoapp", on).apply() }
     fun gamescopeGameOff(context: Context): Boolean = prefs(context).getBoolean("gamescopeGameOff", false)
-fun setGamescopeGameOff(context: Context, on: Boolean) { prefs(context).edit().putBoolean("gamescopeGameOff", on).apply() }
+fun setGamescopeGameOff(
+    fun touchpadHoldDrag(context: Context): Boolean = prefs(context).getBoolean("touchpadHoldDrag", false)
+fun setTouchpadHoldDrag(context: Context, on: Boolean) { prefs(context).edit().putBoolean("touchpadHoldDrag", on).apply() }context: Context, on: Boolean) { prefs(context).edit().putBoolean("gamescopeGameOff", on).apply() }
 
     fun zinkLazy(context: Context): Boolean = prefs(context).getBoolean("zinkLazy", true)
 
