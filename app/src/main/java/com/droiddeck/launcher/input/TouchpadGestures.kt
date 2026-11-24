@@ -17,7 +17,8 @@ class TouchpadGestures(
     var bounds: android.graphics.RectF = android.graphics.RectF(0f, 0f, 1f, 1f)
     var sensitivity = 1.15f
     var desktop = false
-
+    var holdToDrag = false
+    private var pendingMove = false
     private val handler = Handler(Looper.getMainLooper())
     private var lastX = 0f
     private var lastY = 0f
