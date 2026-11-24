@@ -96,7 +96,7 @@ class TouchpadGestures(
             val speed = abs(dx) + abs(dy)
             val gain = sensitivity * (1f + minOf(speed / 40f, 1.5f))
             place(x + dx * gain, y + dy * gain)
-            listener.onMove(x, y)
+            pendingMove = true
         }
     }
 
