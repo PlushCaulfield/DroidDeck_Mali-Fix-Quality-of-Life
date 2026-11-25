@@ -89,6 +89,7 @@ class ModeSettings(
     val steamRepairQueued: Boolean = false,
     val mangoapp: Boolean = true,
     val gamescopeGameOff: Boolean = false,
+    val touchpadHoldDrag: Boolean = false,
     val steamController: String? = null,
     val unfoldedControls: Boolean? = null,
     val unfoldedControlsWithController: Boolean = false,
@@ -141,6 +142,7 @@ class ModeSettingsActions(
     val onSteamRepair: () -> Unit = {},
     val onSteamClientArch: (String) -> Unit = {},
     val onGamescopeGameOff: (Boolean) -> Unit = {},
+        val onTouchpadHoldDrag: (Boolean) -> Unit = {},
     val onMangoapp: (Boolean) -> Unit = {},
     val onReturnAfterGame: (Boolean) -> Unit = {},
     val onShaderPrecache: (Boolean) -> Unit = {},
@@ -267,6 +269,11 @@ fun ModeSheetRows(s: ModeSettings, a: ModeSettingsActions, tab: String, extras: 
                 listOf(SessionPrefs.TOUCH_AUTO to stringResource(R.string.common_auto), SessionPrefs.TOUCH_PAD to stringResource(R.string.mode_touch_touchpad), SessionPrefs.TOUCH_DIRECT to stringResource(R.string.mode_touch_direct), SessionPrefs.TOUCH_GESTURES to stringResource(R.string.mode_touch_gestures), SessionPrefs.TOUCH_OFF to stringResource(R.string.widgets_off)), s.touchMode,
                 note = stringResource(R.string.mode_touch_note),
                 onPick = a.onTouch,
+            )
+                        ToggleRow(
+                host, "touchpadholddrag", stringResource(R.string.mode_touchpad_hold_drag),
+                stringResource(R.string.mode_touchpad_hold_drag_hint),
+                s.touchpadHoldDrag, onChange = a.onTouchpadHoldDrag,
             )
             if (steam && s.oscMode != null) ChoiceRow(
                 host, "osc", stringResource(R.string.mode_osc), null,
