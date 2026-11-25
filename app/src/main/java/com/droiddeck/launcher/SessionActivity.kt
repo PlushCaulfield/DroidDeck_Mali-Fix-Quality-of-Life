@@ -3468,6 +3468,7 @@ class SessionActivity : ComponentActivity(), SurfaceHolder.Callback {
         if (::touchpad.isInitialized) {
             val speed = steamTouchOptions?.trackpadSensitivity?.takeIf { steamTouchControls?.visibility == View.VISIBLE } ?: 1f
             touchpad.sensitivity = 1.15f * speed
+                        touchpad.holdToDrag = SessionPrefs.touchpadHoldDrag(this)
         }
         if (next == routedTouchMode) return
         if (::touchscreenGestures.isInitialized) touchscreenGestures.cancel()
