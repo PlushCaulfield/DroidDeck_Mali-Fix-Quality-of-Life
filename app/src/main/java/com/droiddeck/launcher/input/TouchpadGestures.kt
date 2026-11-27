@@ -19,6 +19,7 @@ class TouchpadGestures(
     var desktop = false
     var holdToDrag = false
     private var pendingMove = false
+    private var lastMoveSent = 0L
     private val handler = Handler(Looper.getMainLooper())
     private var lastX = 0f
     private var lastY = 0f
@@ -214,10 +215,11 @@ class TouchpadGestures(
                 for (h in 0 until event.historySize)
                     trackMove(event.getHistoricalX(0, h), event.getHistoricalY(0, h))
                 trackMove(event.x, event.y)
-                            if (pendingMove) {
-                pendingMove = false
-                listener.onMove(x, y)
-                            }
+                    if (pendingMove && event.eventTime - lastMoveSent >= MOVE_INTERVAL_MS) {
+                        pendingMove = false
+                        lastMoveSent = event.eventTime
+                        listener.onMove(x, y)
+                        }
                 return true
             }
             MotionEvent.ACTION_POINTER_UP -> {
@@ -258,6 +260,10 @@ class TouchpadGestures(
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 handler.removeCallbacks(longPress)
                 val cancelled = event.actionMasked == MotionEvent.ACTION_CANCEL
+                                if (pendingMove) {
+                    pendingMove = false
+                    listener.onMove(x, y)
+                                }
                 when {
                     dragging -> listener.onButton(PointerGestures.BTN_LEFT, false, x, y)
                     twoFingers -> {
@@ -287,5 +293,6 @@ class TouchpadGestures(
         private const val PINCH_STEP_PX = 60f
         private const val HOLD_DRAG_MOVER_SLOPS = 2f
         private const val HOLD_DRAG_ANCHOR_SLOPS = 0.5f
+        private const val MOVE_INTERVAL_MS = 33L
     }
 }
