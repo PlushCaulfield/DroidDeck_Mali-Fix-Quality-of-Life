@@ -134,6 +134,7 @@ class FrontEndActivity : ComponentActivity() {
     private var steamRepairQueued by mutableStateOf(false)
     private var mangoapp by mutableStateOf(true)
     private var gamescopeGameOff by mutableStateOf(false)
+    private var touchpadHoldDrag by mutableStateOf(false)
     private var steamController by mutableStateOf(SessionPrefs.CONTROLLER_DECK)
     private var showComponents by mutableStateOf(false)
     private var focusComponentsContent by mutableStateOf(true)
@@ -2189,6 +2190,7 @@ class FrontEndActivity : ComponentActivity() {
                 steamRepairQueued = steamRepairQueued,
                 mangoapp = mangoapp,
                 gamescopeGameOff = gamescopeGameOff,
+                touchpadHoldDrag = touchpadHoldDrag,
                 steamController = if (mode == SessionService.MODE_STEAM) steamController else null,
                 startupSession = startupSession,
                 bootMovie = if (mode == SessionService.MODE_STEAM) bootMovie else null,
@@ -2281,6 +2283,7 @@ class FrontEndActivity : ComponentActivity() {
                 },
                 onMangoapp = { on -> SessionPrefs.setMangoapp(this, on); mangoapp = on },
                 onGamescopeGameOff = { on -> SessionPrefs.setGamescopeGameOff(this, on); gamescopeGameOff = on },
+                onTouchpadHoldDrag = { on -> SessionPrefs.setTouchpadHoldDrag(this, on); touchpadHoldDrag = on },
                 onReturnAfterGame = { on -> SessionPrefs.setReturnAfterGame(this, on); returnAfterGame = on },
                 onShaderPrecache = { on -> SessionPrefs.setShaderPrecache(this, on); shaderPrecache = on },
                 onSteamController = { id -> SessionPrefs.setSteamController(this, id); steamController = id },
@@ -2475,6 +2478,7 @@ class FrontEndActivity : ComponentActivity() {
         steamRepairQueued = SteamRepair.queued(this)
         mangoapp = SessionPrefs.mangoapp(this)
         gamescopeGameOff = SessionPrefs.gamescopeGameOff(this)
+        touchpadHoldDrag = SessionPrefs.touchpadHoldDrag(this)
         returnAfterGame = SessionPrefs.returnAfterGame(this)
         loadShaderPrecache(mode)
         steamController = SessionPrefs.steamController(this)
