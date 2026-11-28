@@ -293,6 +293,6 @@ class TouchpadGestures(
         private const val PINCH_STEP_PX = 60f
         private const val HOLD_DRAG_MOVER_SLOPS = 2f
         private const val HOLD_DRAG_ANCHOR_SLOPS = 0.5f
-        private const val MOVE_INTERVAL_MS = 33L
+        private const val MOVE_INTERVAL_MS = 16L
     }
 }
